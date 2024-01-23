@@ -1,0 +1,33 @@
+server:
+  extraEnvironmentVars:
+    AWS_DEFAULT_REGION: "<AWS_REGION>" # Replace <AWS_REGION> with your AWS region
+
+  extraVolumes:
+    - type: secret
+      name: vault-tls
+
+  extraVolumeMounts:
+    - mountPath: /vault/tls
+      name: vault-tls
+
+  dataStorage:
+    enabled: true
+
+  config: |
+    storage "dynamodb" {
+      region     = "<AWS_REGION>"         # Replace <AWS_REGION> with your AWS region
+      table      = "<DYNAMODB_TABLE>"     # Replace <DYNAMODB_TABLE> with your DynamoDB table name
+    }
+
+    seal "awskms" {
+      region     = "<AWS_REGION>"         # Replace <AWS_REGION> with your AWS region
+      kms_key_id = "<KMS_KEY_ID>"         # Replace <KMS_KEY_ID> with your KMS Key ID
+    }
+
+    listener "tcp" {
+      address     = "0.0.0.0:8200"
+      tls_cert_file = "/vault/tls/tls.crt"
+      tls_key_file  = "/vault/tls/tls.key"
+    }
+
+    ui = true
